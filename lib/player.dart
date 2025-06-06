@@ -8,14 +8,19 @@ class Player extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment((2 * playerX + playerWidth) / (2 - playerWidth), 0.9),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          height: 10,
-          width: MediaQuery.of(context).size.width * playerWidth / 2,
+    double screenWidth = MediaQuery.of(context).size.width;
+    double paddleWidth = screenWidth * (playerWidth / 2); // FIXED
+    double paddleLeft = (screenWidth / 2) * (playerX + 1) - (paddleWidth / 2);
+
+    return Positioned(
+      bottom: 30,
+      left: paddleLeft.clamp(0, screenWidth - paddleWidth),
+      child: Container(
+        width: paddleWidth,
+        height: 10,
+        decoration: BoxDecoration(
           color: Colors.green,
+          borderRadius: BorderRadius.circular(10),
         ),
       ),
     );

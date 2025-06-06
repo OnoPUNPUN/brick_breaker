@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'ball.dart';
+import 'bricks.dart';
 import 'cover_screen.dart';
 import 'game_over_screen.dart';
 
@@ -15,7 +16,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-enum Direction { up, down }
+enum Direction { up, down, left, right }
 
 class _HomePageState extends State<HomePage> {
   final FocusNode _focusNode = FocusNode();
@@ -26,10 +27,20 @@ class _HomePageState extends State<HomePage> {
     _focusNode.dispose();
   }
 
+  //brick variables
+  double brickX = 0;
+  double brickY = -0.9;
+  double brickWidth = 0.4;
+  double brickHeight = 0.1;
+  bool isBrickBreak = false;
+
   //ball variables
   double ballX = 0;
   double ballY = 0;
-  var ballDirection = Direction.down;
+  double ballXSides = 0.01;
+  double ballYSides = 0.01;
+  var ballYDirection = Direction.down;
+  var ballXDirection = Direction.left;
 
   //player variables
   double playerX = -0.2;
@@ -55,15 +66,38 @@ class _HomePageState extends State<HomePage> {
           isGameOver = true;
         });
       }
+      // is brick break
     });
   }
 
+  void checkBrokenBricks() {
+    if (ballX >= brickX &&
+        ballX <= brickX + brickWidth &&
+        ballY >= brickY + brickWidth &&
+        isBrickBreak == false) {
+      setState(() {
+        isBrickBreak = true;
+        ballYDirection = Direction.down;
+      });
+    }
+  }
+
   void moveBall() {
+    // move ball horizontally
     setState(() {
-      if (ballDirection == Direction.down) {
-        ballY += 0.01;
-      } else if (ballDirection == Direction.up) {
-        ballY -= 0.01;
+      if (ballXDirection == Direction.left) {
+        ballX -= ballXSides;
+      } else if (ballXDirection == Direction.right) {
+        ballX += ballXSides;
+      }
+    });
+
+    //move ball vertically
+    setState(() {
+      if (ballYDirection == Direction.down) {
+        ballY += ballYSides;
+      } else if (ballYDirection == Direction.up) {
+        ballY -= ballYSides;
       }
     });
   }
@@ -71,10 +105,17 @@ class _HomePageState extends State<HomePage> {
   void updateDirection() {
     setState(() {
       if (ballY >= 0.9 && ballX >= playerX && ballX <= playerX + playerWidth) {
-        ballDirection = Direction.up;
-      } else if (ballY <= -0.9) {
-        ballDirection = Direction.down;
+        ballYDirection = Direction.up;
+      } else if (ballY <= -1) {
+        ballYDirection = Direction.down;
       }
+
+      if(ballX >= 1){
+        ballXDirection = Direction.left;
+      } else if(ballX <= -1){
+        ballXDirection = Direction.right;
+      }
+
     });
   }
 
@@ -87,18 +128,18 @@ class _HomePageState extends State<HomePage> {
   }
 
   //Moving Logic by key
-  void moveLeft() {
+  void moveRight() {
     setState(() {
-      if (!(playerX - 0.2 <= -1)) {
-        playerX -= 0.2;
+      if (playerX + 0.2 + playerWidth <= 2) {
+        playerX += 0.2;
       }
     });
   }
 
-  void moveRight() {
+  void moveLeft() {
     setState(() {
-      if (!(playerX + playerWidth >= 1)) {
-        playerX += 0.2;
+      if (playerX - 0.2 >= -1) {
+        playerX -= 0.2;
       }
     });
   }
@@ -126,14 +167,21 @@ class _HomePageState extends State<HomePage> {
               children: [
                 //tap to play
                 CoverScreen(isStarted: isGameStarted),
-
                 // game over screen
                 GameOverScreen(isGameOver: isGameOver),
-
                 //Ball
                 Ball(ballX: ballX, ballY: ballY),
                 // player
                 Player(playerX: playerX, playerWidth: playerWidth),
+
+                //bricks
+                Bricks(
+                  brickX: brickX,
+                  brickY: brickY,
+                  brickHeight: brickHeight,
+                  brickWidth: brickWidth,
+                  brickBreak: isBrickBreak,
+                ),
               ],
             ),
           ),
