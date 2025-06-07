@@ -31,7 +31,7 @@ class _HomePageState extends State<HomePage> {
   double brickX = 0;
   double brickY = -0.9;
   double brickWidth = 0.4;
-  double brickHeight = 0.1;
+  double brickHeight = 0.05;
   bool isBrickBreak = false;
 
   //ball variables
